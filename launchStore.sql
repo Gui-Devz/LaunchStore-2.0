@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS lauchstore;
+DROP DATABASE IF EXISTS launchstore_db;
 CREATE DATABASE launchstore_db;
 
 CREATE TABLE "products" (
@@ -20,6 +20,10 @@ CREATE TABLE "categories" (
   "name" text NOT NULL
 );
 
+INSERT INTO categories(name) VALUES ('computador');
+INSERT INTO categories(name) VALUES ('eletrônicos');
+INSERT INTO categories(name) VALUES ('automóveis');
+
 CREATE TABLE "files" (
   "id" SERIAL PRIMARY KEY,
   "name" text,
@@ -28,12 +32,27 @@ CREATE TABLE "files" (
 );
 
 
--- Foreign key
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "name" text NOT NULL,
+  "email" text NOT NULL,
+  "password" text NOT NULL,
+  "cpf_cnpj" int UNIQUE NOT NULL,
+  "cep" text,
+  "address" text,
+  "created_at" timestamp DEFAULT (now()),
+  "updated_at" timestamp DEFAULT (now())
+);
+
+-- Foreign keys
 ALTER TABLE "products" ADD FOREIGN KEY ("category_id") REFERENCES "categories" ("id");
 
 ALTER TABLE "files" ADD FOREIGN KEY ("product_id") REFERENCES "products" ("id");
 
--- CREATE PROCEDURE
+ALTER TABLE "products" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+
+-- CREATE Procedure
 CREATE FUNCTION trigger_set_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -42,8 +61,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- AUTO updated_at on recipes
+-- AUTO updated_at on 'products' table
 CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON recipes
+BEFORE UPDATE ON products
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- AUTO updated_at on 'users' table
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
