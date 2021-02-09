@@ -17,4 +17,8 @@ routes.get("/ads/create", (req, res) => {
   return res.send("olá");
 });
 
+routes.get("/users/register", (req, res) => {
+  return res.redirect("/users/register");
+});
+
 module.exports = routes;
