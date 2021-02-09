@@ -1,0 +1,117 @@
+  <div class="item">
+    <div>Categoria</div>
+    <div>
+      <select name="category_id">
+        {% for category in categories %}
+          <option value="{{category.id}}" {% if product.category_id == category.id %} selected {% endif %}>
+            {{category.name}}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="item">
+    <div>Título</div>
+    <div>
+      <input type="text" name="name" placeholder="Título do anúncio" value="{{product.name}}">
+    </div>
+  </div>
+
+  <div class="item">
+    <div>Descrição</div>
+    <div>
+      <textarea name="description" cols="30" rows="10">{{product.description}}</textarea>
+    </div>
+  </div>
+
+  <div class="item">
+    <div>Valor</div>
+    <div>
+      <input
+        type="text"
+        name="price"
+        value="{{product.price}}"
+        onkeydown = "Mask.apply(this,'formatBRL')"
+      {# Faremos uma máscara de dinheito em reais #}>
+      {% if product.old_price %}
+        <input type="hidden" name="old_price" value="{{product.price}}">
+      {% endif %}
+    </div>
+  </div>
+  <div class="item">
+    <div>Imagens</div>
+    <div>
+      <div class="photos-upload">
+        <input type="file"
+        name="photos"
+        id="images-input"
+        multiple
+        accept="images/*"
+        onchange = "PhotosUpload.handleFileInput(event)"
+        >
+        <p class="btn">Selecione até 6 fotos</p>
+      </div>
+      <div class="photos-preview">
+        {% if photos %}
+          {% for photo in photos %}
+            <div class="photo">
+              <img src="{{photo.src}}" alt="photo.name">
+              <i class="material-icons" id="{{photo.id}}" onclick="PhotosUpload.removeImage(event)">close</i>
+          </div>
+          {% endfor %}
+          <input class="removed-photos" type="hidden" name="removed_photos">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <div>Quantidade</div>
+    <div>
+      <input
+        type="number"
+        name="quantity"
+        placeholder="Estoque disponível"
+        value="{{product.quantity}}">
+    </div>
+  </div>
+
+{% if product.status == "1" or product.status == "0" %}
+  <div class="item">
+    <div>Disponível</div>
+    <div>
+      <span>
+        <input
+          type="radio"
+          name="status"
+          value="1"
+          {% if product.status == '1' %}
+            checked
+          {% endif %}> Sim
+      </span>
+
+      <span>
+        <input
+          type="radio"
+          name="status"
+          value="0"
+          {% if product.status == '0' %}
+            checked
+          {% endif %}> Não
+      </span>
+    </div>
+{% endif %}
+
+{% if product.id %}
+  <input type="hidden" name="id" value="{{product.id}}">
+{% endif %}
+</div>
+
+
+
+
+
+
+
+
