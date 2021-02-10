@@ -65,13 +65,16 @@ module.exports = {
 
     return photos;
   },
-  validationOfBlankForms(fields, req, res) {
+  validationOfBlankForms(fields) {
     const keys = Object.keys(fields);
+    let empty = false;
 
-    for (const key of keys) {
-      if (req.body[key] == "" && key != "removed_photos") {
-        return res.send("Fill all the fields");
+    keys.forEach((key) => {
+      if (fields[key] === "" && key !== "removed_photos") {
+        empty = true;
       }
-    }
+    });
+
+    return empty;
   },
 };
