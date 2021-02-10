@@ -12,6 +12,44 @@ const Mask = {
       currency: "BRL",
     }).format(value / 100);
   },
+  cpfCnpj(value) {
+    let newValue = value;
+    newValue = newValue.replace(/\D/g, "");
+
+    if (newValue.length > 14) {
+      newValue = newValue.slice(0, -1);
+    }
+
+    if (newValue.length > 11) {
+      //CNPJ
+      //88.998.914/0001-34
+      newValue = newValue.replace(/(\d{2})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1/$2");
+      newValue = newValue.replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      //CPF
+      //111.222.333-95
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1-$2");
+    }
+
+    return newValue;
+  },
+
+  cep(value) {
+    let newValue = value;
+    newValue = newValue.replace(/\D/g, "");
+
+    if (newValue.length > 8) {
+      newValue = newValue.slice(0, -1);
+    }
+    //CEP
+    //65041-081
+    newValue = newValue.replace(/(\d{5})(\d)/, "$1-$2");
+    return newValue;
+  },
 };
 
 const PhotosUpload = {
@@ -160,5 +198,73 @@ const Lightbox = {
   close() {
     this.modal.style.opacity = 0;
     this.modal.style.top = "-100%";
+  },
+};
+
+const Validate = {
+  apply(input, func) {
+    Validate.clearErrors(input);
+
+    let results = Validate[func](input.value);
+    input.value = results.value;
+
+    if (results.error) {
+      Validate.displayError(input, results.error);
+    }
+  },
+  displayError(input, error) {
+    const div = document.createElement("div");
+
+    div.classList.add("error");
+    div.innerHTML = error;
+    input.parentNode.appendChild(div);
+    input.focus();
+  },
+
+  clearErrors(input) {
+    const errorDiv = input.parentNode.querySelector(".error");
+
+    if (errorDiv) errorDiv.remove();
+  },
+  isEmail(value) {
+    let error = null;
+    const mailFormat = /^\w+([\.-]?\w+)*@(\w{3})+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+    if (!value.match(mailFormat)) error = "Email Inválido";
+
+    return {
+      error,
+      value,
+    };
+  },
+
+  isCpf_Cnpj(value) {
+    let error = null;
+    const cleanValues = value.replace(/\D/g, "");
+
+    if (cleanValues.length > 11 && cleanValues.length !== 14) {
+      error = "CNPJ Incorreto!";
+    } else if (cleanValues.length < 12 && cleanValues.length !== 11) {
+      error = "CPF Incorreto!";
+    }
+
+    return {
+      error,
+      value,
+    };
+  },
+
+  isCep(value) {
+    let error = null;
+    const cleanValues = value.replace(/\D/g, "");
+
+    if (cleanValues.length !== 8) {
+      error = "CEP Incorreto!";
+    }
+
+    return {
+      error,
+      value,
+    };
   },
 };
