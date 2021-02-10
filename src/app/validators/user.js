@@ -7,7 +7,12 @@ const User = require("../models/User");
 
 async function post(req, res, next) {
   //check if has all fields
-  if (validationOfBlankForms(req.body)) return res.send("Fill all the fields");
+  if (validationOfBlankForms(req.body)) {
+    return res.render("user/register", {
+      error: "Por favor, preencha todos os campos do formulário",
+      user: req.body,
+    });
+  }
 
   //check if user exists [email, cpf_cnpj]
   let { email, cpf_cnpj, password, passwordRepeat } = req.body;
@@ -19,10 +24,20 @@ async function post(req, res, next) {
     or: { cpf_cnpj },
   });
 
-  if (user.rows.length > 0) return res.send("User already exists!");
+  if (user.rows.length > 0) {
+    return res.render("user/register", {
+      error: "Usuário já cadastrado!",
+      user: req.body,
+    });
+  }
 
   //check if password match
-  if (password !== passwordRepeat) return res.send("Password Mismatch");
+  if (password !== passwordRepeat) {
+    return res.render("user/register", {
+      error: "As senhas não são iguais!",
+      user: req.body,
+    });
+  }
 
   next();
 }
