@@ -169,7 +169,8 @@ nav.primary ul li a:hover {
 }
 
 .container .form .header h3,
-.user-register .header h3 {
+.user-register .header h3,
+.user-index .header h3 {
   font-size: 14px;
   line-height: 24px;
   letter-spacing: 0.7px;
@@ -602,7 +603,8 @@ nav.primary ul li a:hover {
 
 /* USER REGISTER FORM */
 
-.user-register {
+.user-register,
+.user-index {
   max-width: 500px;
   margin: 0 auto;
 }
