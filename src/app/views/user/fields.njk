@@ -38,6 +38,7 @@
           type="password"
           name="passwordRepeat"
           placeholder="Digite a senha novamente"
+          value={{user.passwordRepeat}}
         >
       </div>
     </div>
@@ -50,7 +51,7 @@
         type="text"
         name="cpf_cnpj"
         placeholder="Digite seu documento"
-        value="{{user.cep}}"
+        value="{{user.cpf_cnpj}}"
         onkeydown = "Mask.apply(this,'cpfCnpj')"
         onblur = "Validate.apply(this,'isCpf_Cnpj')"
       >
