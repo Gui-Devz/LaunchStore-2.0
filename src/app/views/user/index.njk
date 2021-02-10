@@ -1,0 +1,51 @@
+{% extends "../layout.njk" %}
+
+{% block content %}
+  <section class="user-dashboard form">
+    <div class="user-index container form">
+      <form method="POST" action="/users?_method=PUT">
+        <div class="header">
+          <h3>Detalhes</h3>
+        </div>
+        <input type="hidden" value="{{user.id}}">
+        <div class="fields">
+          {% include 'user/fields.njk'%}
+        </div>
+
+        <button class="button edit" type="submit">atualizar</button>
+      </form>
+      <div>
+        <form class="delete" method="POST" action="/users?_method=DELETE">
+          <input type="hidden" name="id" value="{{user.id}}">
+         
+          <div class="item">
+              <button class="button delete" type="submit">deletar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const deleteForm = document.querySelector(".delete");
+    const buttonSave = document.querySelector(".button");
+    deleteForm.addEventListener("submit", (event) =>{
+      const confirmation = confirm("Deseja excluir a sua conta? Essa operação não poderá ser desfeita!");
+      if (!confirmation) {
+          event.preventDefault();
+      }
+    });
+
+    buttonSave.addEventListener("click", (event) => {
+      const confirmation = confirm("Deseja salvar esses dados?!");
+
+      if (!confirmation) return event.preventDefault();
+    });
+  </script>
+
+
+
+{% endblock content %}
+
+
+
