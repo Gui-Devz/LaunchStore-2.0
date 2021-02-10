@@ -65,6 +65,44 @@ module.exports = {
 
     return photos;
   },
+  formatCpfCnpj(value) {
+    let newValue = value;
+    newValue = newValue.replace(/\D/g, "");
+
+    if (newValue.length > 14) {
+      newValue = newValue.slice(0, -1);
+    }
+
+    if (newValue.length > 11) {
+      //CNPJ
+      //88.998.914/0001-34
+      newValue = newValue.replace(/(\d{2})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1/$2");
+      newValue = newValue.replace(/(\d{4})(\d)/, "$1-$2");
+    } else {
+      //CPF
+      //111.222.333-95
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1.$2");
+      newValue = newValue.replace(/(\d{3})(\d)/, "$1-$2");
+    }
+
+    return newValue;
+  },
+  formatCep(value) {
+    let newValue = value;
+    newValue = newValue.replace(/\D/g, "");
+
+    if (newValue.length > 8) {
+      newValue = newValue.slice(0, -1);
+    }
+    //CEP
+    //65041-081
+    newValue = newValue.replace(/(\d{5})(\d)/, "$1-$2");
+    return newValue;
+  },
+
   validationOfBlankForms(fields) {
     const keys = Object.keys(fields);
     let empty = false;
