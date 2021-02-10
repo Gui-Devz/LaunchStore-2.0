@@ -609,10 +609,18 @@ nav.primary ul li a:hover {
   margin: 0 auto;
 }
 
-.user-register .form input[name="email"],
-.user-register .form input[name="password"],
+/* .user-register .form input[name="password"],
 .user-register .form input[name="passwordRepeat"],
 .user-register .form input[name="cpf_cnpj"],
 .user-register .form input[name="cep"] {
   max-width: 60%;
+} */
+
+/*  validate errors */
+
+.user-register .form .error {
+  background-color: #e74c3c;
+  padding: 4px;
+  border-radius: 4px;
+  color: white;
 }
