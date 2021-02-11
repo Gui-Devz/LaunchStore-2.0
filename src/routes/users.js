@@ -23,8 +23,8 @@ routes.post("/password-reset", sessionController.reset);
 routes.get("/register", userController.registerForm);
 routes.post("/register", Validator.post, userController.post);
 
-/* routes.get("/", userController.show);
-routes.update("/", userController.update);
-routes.delete("/", userController.delete); */
-
+routes.get("/", Validator.show, userController.show);
+routes.put("/", Validator.update, userController.update);
+/* routes.delete("/", userController.delete);
+ */
 module.exports = routes;
