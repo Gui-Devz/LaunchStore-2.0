@@ -1,22 +1,27 @@
 const db = require("../../config/db");
 const { hash } = require("bcryptjs");
+
 module.exports = {
   findOne(filters) {
-    let query = "SELECT * FROM users";
+    try {
+      let query = "SELECT * FROM users";
 
-    Object.keys(filters).map((key) => {
-      //WHERE | OR | AND
-      query = `
-        ${query}
-        ${key}
-      `;
+      Object.keys(filters).map((key) => {
+        //WHERE | OR | AND
+        query = `
+          ${query}
+          ${key}
+        `;
 
-      Object.keys(filters[key]).map((field) => {
-        query = `${query} ${field} = '${filters[key][field]}'`;
+        Object.keys(filters[key]).map((field) => {
+          query = `${query} ${field} = '${filters[key][field]}'`;
+        });
       });
-    });
 
-    return db.query(query);
+      return db.query(query);
+    } catch (error) {
+      console.error(error);
+    }
   },
 
   async create(data) {
@@ -48,6 +53,33 @@ module.exports = {
       const results = await db.query(query, values);
 
       return results.rows[0].id;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  async update(id, fields) {
+    try {
+      let query = `UPDATE users SET`;
+
+      Object.keys(fields).map(async (key, index, array) => {
+        if (index + 1 < array.length) {
+          query = `
+            ${query}
+            ${key} = '${fields[key]}',
+          `;
+        } else {
+          query = `
+            ${query}
+            ${key} = '${fields[key]}'
+            WHERE id = ${id}
+          `;
+        }
+      });
+
+      await db.query(query);
+
+      return;
     } catch (error) {
       console.error(error);
     }
