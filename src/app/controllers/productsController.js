@@ -30,8 +30,8 @@ module.exports = {
       minutes,
     };
 
-    product.price = formatPricing(product.price).replace(".", ",");
-    product.old_price = formatPricing(product.old_price).replace(".", ",");
+    product.price = formatPricing(product.price);
+    product.old_price = formatPricing(product.old_price);
 
     if (!product) return res.send("Product not found!");
 
