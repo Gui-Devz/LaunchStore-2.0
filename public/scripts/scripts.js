@@ -96,7 +96,7 @@ const PhotosUpload = {
     const { uploadLimit, files, input } = PhotosUpload;
 
     const totalPhotoDivs = document.querySelectorAll(".photo");
-    console.log(totalPhotoDivs);
+
     const totalFiles =
       files.length + input.files.length + totalPhotoDivs.length;
 
