@@ -1,0 +1,17 @@
+.user-login .fields {
+  margin-bottom: 32px;
+}
+
+.user-login .footer ul {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.user-login .footer ul li a {
+  color: #777;
+}
+
+.user-login .footer ul li a:hover {
+  color: black;
+  font-weight: bold;
+}
