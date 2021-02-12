@@ -41,6 +41,27 @@ async function login(req, res, next) {
   }
 }
 
+async function forgot(req, res, next) {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user.rows[0])
+      return res.render("session/forgot-password", {
+        user: req.body,
+        error: "Email não encontrado!",
+      });
+
+    res.user = user.rows[0];
+
+    next();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 module.exports = {
   login,
+  forgot,
 };
