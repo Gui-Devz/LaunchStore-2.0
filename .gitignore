@@ -5,5 +5,3 @@ node_modules
 .editorconfig
 
 ./public/images/*
-
-./package-lock.json
