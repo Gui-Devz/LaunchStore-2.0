@@ -1,4 +1,11 @@
-.user-login .fields {
+.user-login,
+.user-password {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.user-login .fields,
+.user-password .fields {
   margin-bottom: 32px;
 }
 
