@@ -4,12 +4,12 @@ const multer = require("../app/middlewares/multer");
 
 const productsController = require("../app/controllers/productsController");
 const searchController = require("../app/controllers/searchController");
-
+const { onlyUsers } = require("../app/middlewares/session");
 // Search
 routes.get("/search", searchController.index);
 
 //Products
-routes.get("/create", productsController.create);
+routes.get("/create", onlyUsers, productsController.create);
 routes.get("/:id", productsController.show);
 routes.get("/:id/edit", productsController.edit);
 
