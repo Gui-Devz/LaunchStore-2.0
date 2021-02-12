@@ -4,7 +4,7 @@ const { compare } = require("bcryptjs");
 
 async function show(req, res, next) {
   try {
-    const { userId: id } = req.session;
+    const { userID: id } = req.session;
 
     const results = await User.findOne({ where: { id } });
     const user = results.rows[0];
@@ -41,7 +41,7 @@ async function post(req, res, next) {
       or: { cpf_cnpj },
     });
 
-    if (user.rows.length > 0) {
+    if (!user.rows[0]) {
       return res.render("user/register", {
         error: "Usuário já cadastrado!",
         user: req.body,
@@ -71,18 +71,10 @@ async function update(req, res, next) {
       });
     }
 
-    //has password
-    const { id, password } = req.body;
-    if (!password)
-      return res.render("user/index", {
-        user: req.body,
-        error: "Coloque a sua senha para atualizar o seu cadastrado",
-      });
-
     //password match
     const user = await User.findOne({ where: { id } });
 
-    if (!user)
+    if (!user.rows[0])
       return res.render("user/register", {
         error: "Usuário não encontrado!",
       });
