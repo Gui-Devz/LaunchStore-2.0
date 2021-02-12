@@ -4,9 +4,6 @@ const mailer = require("../../lib/mailer");
 
 module.exports = {
   loginForm(req, res) {
-    const { errorMessage } = req;
-
-    console.log(req.errorCreate);
     return res.render("session/login");
   },
 
@@ -67,5 +64,20 @@ module.exports = {
     } catch (error) {
       console.error(error);
     }
+  },
+
+  resetForm(req, res) {
+    try {
+      const { token } = req.query;
+
+      return res.render("session/password-reset", { token });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  reset(req, res) {
+    try {
+    } catch (error) {}
   },
 };
