@@ -38,6 +38,9 @@ async function login(req, res, next) {
     next();
   } catch (error) {
     console.error(error);
+    return res.render("session/forgot-password", {
+      error: "Erro inesperado, tente novamente.",
+    });
   }
 }
 
@@ -53,11 +56,14 @@ async function forgot(req, res, next) {
         error: "Email não encontrado!",
       });
 
-    res.user = user.rows[0];
+    req.user = user.rows[0];
 
     next();
   } catch (error) {
     console.error(error);
+    return res.render("session/forgot-password", {
+      error: "Erro inesperado, tente novamente.",
+    });
   }
 }
 
