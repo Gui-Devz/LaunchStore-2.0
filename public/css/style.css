@@ -604,7 +604,8 @@ nav.primary ul li a:hover {
 /* USER REGISTER FORM */
 
 .user-register,
-.user-index {
+.user-index,
+.user-login {
   max-width: 500px;
   margin: 0 auto;
 }
