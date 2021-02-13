@@ -6,8 +6,7 @@ async function show(req, res, next) {
   try {
     const { userID: id } = req.session;
 
-    const results = await User.findOne({ where: { id } });
-    const user = results.rows[0];
+    const user = await User.findOne({ where: { id } });
 
     if (!user)
       return res.render("user/register", {
@@ -41,7 +40,7 @@ async function post(req, res, next) {
       or: { cpf_cnpj },
     });
 
-    if (!user.rows[0]) {
+    if (!user) {
       return res.render("user/register", {
         error: "Usuário já cadastrado!",
         user: req.body,
@@ -62,6 +61,8 @@ async function post(req, res, next) {
   }
 }
 async function update(req, res, next) {
+  const { password } = req.body;
+  const id = req.session.userID;
   try {
     //filled all fields
     if (validationOfBlankForms(req.body)) {
@@ -74,14 +75,12 @@ async function update(req, res, next) {
     //password match
     const user = await User.findOne({ where: { id } });
 
-    if (!user.rows[0])
+    if (!user)
       return res.render("user/register", {
         error: "Usuário não encontrado!",
       });
 
-    const userPassword = user.rows[0].password;
-
-    const passed = await compare(password, userPassword);
+    const passed = await compare(password, user.password);
 
     if (!passed)
       return res.render("user/index", {
@@ -97,8 +96,45 @@ async function update(req, res, next) {
   }
 }
 
+async function deleteUser(req, res, next) {
+  const { password } = req.body;
+  const id = req.session.userID;
+  try {
+    //filled all fields
+    if (validationOfBlankForms(req.body)) {
+      return res.render("user/index", {
+        error: "Por favor, preencha todos os campos do formulário",
+        user: req.body,
+      });
+    }
+
+    //password match
+    const user = await User.findOne({ where: { id } });
+
+    if (!user)
+      return res.render("user/register", {
+        error: "Usuário não encontrado!",
+      });
+
+    const passed = await compare(password, user.password);
+
+    if (!passed)
+      return res.render("user/index", {
+        user: user,
+        error: "Senha incorreta!",
+      });
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 module.exports = {
   post,
   show,
   update,
+  deleteUser,
 };
