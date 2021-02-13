@@ -41,7 +41,9 @@ CREATE TABLE "users" (
   "cep" text,
   "address" text,
   "created_at" timestamp DEFAULT (now()),
-  "updated_at" timestamp DEFAULT (now())
+  "updated_at" timestamp DEFAULT (now()),
+  "reset_token" text,
+  "reset_token_expires" text
 );
 
 -- Foreign keys
@@ -84,3 +86,15 @@ WITH (OIDS=FALSE);
 ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
 
 CREATE INDEX "IDX_session_expire" ON "session" ("expire");
+
+-- cascade effect when delete user
+ALTER TABLE "products"
+DROP CONSTRAINT products_user_id_fkey,
+ADD CONSTRAINT products_user_id_fkey
+FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
+
+ALTER TABLE "files"
+DROP CONSTRAINT files_product_id_fkey,
+ADD CONSTRAINT files_product_id_fkey
+FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON DELETE CASCADE;
+
