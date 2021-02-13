@@ -17,15 +17,14 @@ module.exports = {
         return file.length != 0 ? file[0].src : null;
       }
 
-      const productsPromises = products
-        .map(async (product) => {
-          product.img = await getImage(product.id);
-          product.old_price = formatPricing(product.old_price);
-          product.price = formatPricing(product.price);
+      const productsPromises = products.map(async (product) => {
+        product.img = await getImage(product.id);
+        product.old_price = formatPricing(product.old_price);
+        product.price = formatPricing(product.price);
 
-          return product;
-        })
-        .filter((product, index) => (index > 2 ? false : true));
+        return product;
+      });
+      //.filter((product, index) => (index > 2 ? false : true));
 
       const lastAdded = await Promise.all(productsPromises);
 
