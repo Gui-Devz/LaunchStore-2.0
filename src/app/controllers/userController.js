@@ -34,7 +34,7 @@ module.exports = {
   async update(req, res) {
     try {
       const { user } = req;
-      const userID = user.rows[0].id;
+      const userID = user.id;
 
       let { name, email, cpf_cnpj, cep, address } = req.body;
 
@@ -57,6 +57,23 @@ module.exports = {
       console.error(error);
       return res.render("user/index", {
         error: `Ops.... Ocorreu um erro!`,
+      });
+    }
+  },
+
+  async delete(req, res) {
+    try {
+      await User.delete(req.user.id);
+      req.session.destroy();
+
+      return res.render("session/login", {
+        success: "Conta deletada com sucesso!",
+      });
+    } catch (error) {
+      console.error(error);
+      return res.render("user/index", {
+        user: req.user,
+        error: `Erro ao deletar a sua conta!`,
       });
     }
   },
