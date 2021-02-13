@@ -1,6 +1,7 @@
 const { validationOfBlankForms } = require("../../lib/utils");
 const User = require("../models/User");
 const { compare } = require("bcryptjs");
+const Product = require("../models/Product");
 
 async function login(req, res, next) {
   try {
@@ -127,8 +128,53 @@ async function reset(req, res, next) {
     console.error(error);
   }
 }
+
+async function allowingEditingOfProducts(req, res, next) {
+  try {
+    const { id } = req.params;
+
+    //find user's products
+    const results = await Product.find(id);
+    const product = results.rows[0];
+
+    if (product === undefined) {
+      return res.render("products/show", {
+        error: "Acesso Negado! Esse produto não é seu.",
+      });
+    }
+    if (product.user_id !== req.session.userID)
+      return res.render("products/show", {
+        error: "Acesso Negado! Esse produto não é seu.",
+      });
+
+    next();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function checkBeforeModifyProduct(req, res, next) {
+  try {
+    const { id } = req.body;
+
+    //find user's products
+    const results = await Product.find(id);
+    const product = results.rows[0];
+
+    if (!product || product.user_id !== req.session.userID)
+      return res.render("products/show", {
+        error: "Alteração Negada! Esse produto não é seu.",
+      });
+
+    next();
+  } catch (error) {
+    console.error(error);
+  }
+}
 module.exports = {
   login,
   forgot,
   reset,
+  allowingEditingOfProducts,
+  checkBeforeModifyProduct,
 };
