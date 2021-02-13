@@ -59,27 +59,49 @@ module.exports = {
   },
 
   async post(req, res) {
-    const urlEncoded = req.body;
+    try {
+      req.body.user_id = req.session.userID;
+      const urlEncoded = req.body;
 
-    validationOfBlankForms(urlEncoded, req, res);
+      if (validationOfBlankForms(req.body)) {
+        return res.render("products/create", {
+          error: "Por favor, preencha todos os campos do formulário",
+          user: req.body,
+        });
+      }
 
-    //Validation of quantity of photos sent
-    if (req.files === 0) {
-      res.send("Please send at least one image");
+      //Validation of quantity of photos sent
+      if (req.files.length === 0) {
+        const results = await Category.all();
+
+        const categories = results.rows[0];
+
+        return res.render("products/create", {
+          error: "Por favor, envie ao menos uma imagem!",
+          product: req.body,
+          categories: categories,
+        });
+      }
+
+      //Adding new product to database
+      let results = await Product.create(urlEncoded);
+      const productId = results.rows[0].id;
+
+      //Adding new photos to database
+      const imagesPromises = req.files.map((file) => {
+        File.create(file.filename, file.path, productId);
+      });
+
+      await Promise.all(imagesPromises);
+
+      return res.redirect(`/products/${productId}`);
+    } catch (error) {
+      console.error(error);
+      return res.render("products/create", {
+        error: `Ops.... Ocorreu um erro!`,
+        user: req.body,
+      });
     }
-
-    //Adding new product to database
-    let results = await Product.create(urlEncoded);
-    const productId = results.rows[0].id;
-
-    //Adding new photos to database
-    const imagesPromises = req.files.map((file) => {
-      File.create(file.filename, file.path, productId);
-    });
-
-    await Promise.all(imagesPromises);
-
-    return res.redirect(`/products/${productId}`);
   },
 
   async edit(req, res) {
@@ -105,51 +127,69 @@ module.exports = {
   },
 
   async put(req, res) {
-    const urlEncoded = req.body;
+    try {
+      req.body.user_id = req.session.userID;
+      const urlEncoded = req.body;
 
-    validationOfBlankForms(urlEncoded, req, res);
+      if (validationOfBlankForms(req.body)) {
+        return res.render("products/edit", {
+          error: "Por favor, preencha todos os campos do formulário",
+          user: req.body,
+        });
+      }
 
-    //Updating the old price value
-    urlEncoded.price = urlEncoded.price.replace(/\D/g, "");
+      //Updating the old price value
+      urlEncoded.price = urlEncoded.price.replace(/\D/g, "");
 
-    if (urlEncoded.old_price != urlEncoded.price) {
-      const oldProduct = await Product.find(urlEncoded.id);
+      if (urlEncoded.old_price != urlEncoded.price) {
+        const oldProduct = await Product.find(urlEncoded.id);
 
-      urlEncoded.old_price = oldProduct.rows[0].price;
-    }
+        urlEncoded.old_price = oldProduct.rows[0].price;
+      }
 
-    //Updating the photos excluded in the root and database
-    if (urlEncoded.removed_photos) {
-      const files_id = urlEncoded.removed_photos.split(",");
-      files_id.pop(); // removing the last index (',')
+      //Updating the photos excluded in the root and database
+      if (urlEncoded.removed_photos) {
+        const files_id = urlEncoded.removed_photos.split(",");
+        files_id.pop(); // removing the last index (',')
 
-      files_id.forEach(async (id) => {
-        const result = await File.find(id);
+        files_id.forEach(async (id) => {
+          const result = await File.find(id);
 
-        const file = result.rows[0];
+          const file = result.rows[0];
 
-        //Deleting from Root
-        fs.unlinkSync(file.path);
+          //Deleting from Root
+          fs.unlinkSync(file.path);
 
-        //Deleting from database
-        await File.deleteOnlyOne(id);
+          //Deleting from database
+          await File.deleteOnlyOne(id);
+        });
+      }
+
+      //Updating the product and getting it's ID
+      const results = await Product.update(urlEncoded);
+      const productID = results.rows[0].id;
+
+      //Updating the photos added in the database
+      if (req.files.length != 0) {
+        const imagesPromises = req.files.map((file) => {
+          try {
+            File.create(file.filename, file.path, productID);
+          } catch (error) {
+            console.error(error);
+          }
+        });
+
+        await Promise.all(imagesPromises);
+      }
+
+      return res.redirect(`/products/${productID}`);
+    } catch (error) {
+      console.error(error);
+      return res.render("products/edit", {
+        error: `Ops.... Ocorreu um erro!`,
+        user: req.body,
       });
     }
-
-    //Updating the product and getting it's ID
-    const results = await Product.update(urlEncoded);
-    const productID = results.rows[0].id;
-
-    //Updating the photos added in the database
-    if (req.files != 0) {
-      const imagesPromises = req.files.map((file) => {
-        File.create(file.filename, file.path, productID);
-      });
-
-      await Promise.all(imagesPromises);
-    }
-
-    return res.redirect(`/products/${productID}`);
   },
 
   async delete(req, res) {
