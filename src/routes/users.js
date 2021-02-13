@@ -30,6 +30,6 @@ routes.post("/register", UserValidator.post, userController.post);
 
 routes.get("/", UserValidator.show, userController.show);
 routes.put("/", UserValidator.update, userController.update);
-/* routes.delete("/", userController.delete);
- */
+routes.delete("/", UserValidator.deleteUser, userController.delete);
+
 module.exports = routes;
