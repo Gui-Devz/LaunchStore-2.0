@@ -4,4 +4,4 @@ node_modules
 
 .editorconfig
 
-./public/images/*
+public/images/*
