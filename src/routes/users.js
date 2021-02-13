@@ -22,7 +22,7 @@ routes.post(
   SessionValidator.forgot,
   sessionController.forgot
 );
-// routes.post("/password-reset", sessionController.reset);
+routes.post("/password-reset", SessionValidator.reset, sessionController.reset);
 
 // user register userController
 routes.get("/register", userController.registerForm);
