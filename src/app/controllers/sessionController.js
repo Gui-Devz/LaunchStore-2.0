@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const User = require("../models/User");
 const mailer = require("../../lib/mailer");
+const { hash } = require("bcryptjs");
 
 module.exports = {
   loginForm(req, res) {
@@ -13,7 +14,7 @@ module.exports = {
 
   async login(req, res) {
     // colocar o usuario no req.session
-    const userID = req.user.rows[0].id;
+    const userID = req.user.id;
     req.session.userID = userID;
 
     return res.redirect("/users");
@@ -76,8 +77,33 @@ module.exports = {
     }
   },
 
-  reset(req, res) {
+  async reset(req, res) {
+    const { password, token } = req.body;
     try {
-    } catch (error) {}
+      const { user } = req;
+
+      //criar um novo hash de senha
+      const newPassword = await hash(password, 8);
+
+      //atualizar o usuário
+      await User.update(user.id, {
+        password: newPassword,
+        reset_token: "",
+        reset_token_expires: "",
+      });
+
+      //avisar o usuário que ele tem uma nova senha
+      return res.render("session/login", {
+        user: req.body,
+        success: "Senha atualizada!",
+      });
+    } catch (error) {
+      console.error(error);
+      return res.render("session/forgot-password", {
+        error: "Erro inesperado, tente novamente.",
+        user: req.body,
+        token: token,
+      });
+    }
   },
 };
