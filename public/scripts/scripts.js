@@ -268,3 +268,11 @@ const Validate = {
     };
   },
 };
+
+const allocatingInputValues = {
+  passwordToDelete(input) {
+    const deleteInput = document.querySelector(".delete input");
+
+    deleteInput.value = input.value;
+  },
+};
