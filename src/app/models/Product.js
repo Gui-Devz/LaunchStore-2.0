@@ -7,7 +7,7 @@ module.exports = {
       ORDER BY updated_at
     `);
   },
-  create(dataPut) {
+  create(data) {
     const query = `
       INSERT INTO products (
         category_id,
@@ -22,17 +22,17 @@ module.exports = {
       RETURNING id
     `;
 
-    dataPut.price = dataPut.price.replace(/\D/g, "");
+    data.price = data.price.replace(/\D/g, "");
 
     const values = [
-      dataPut.category_id,
-      dataPut.user_id || 4,
-      dataPut.name,
-      dataPut.description,
-      dataPut.old_price || dataPut.price,
-      dataPut.price,
-      dataPut.quantity,
-      dataPut.status || 1,
+      data.category_id,
+      data.user_id,
+      data.name,
+      data.description,
+      data.old_price || data.price,
+      data.price,
+      data.quantity,
+      data.status || 1,
     ];
 
     return db.query(query, values);
@@ -71,7 +71,7 @@ module.exports = {
 
     const values = [
       dataPut.category_id,
-      dataPut.user_id || 4,
+      dataPut.user_id,
       dataPut.name,
       dataPut.description,
       dataPut.old_price || dataPut.price,
