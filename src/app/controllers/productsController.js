@@ -19,7 +19,7 @@ module.exports = {
 
     //Finding the product requested
     let results = await Product.find(id);
-    const product = results.rows[0];
+    const product = results;
 
     const { day, month, hours, minutes } = formatBrowser(product.updated_at);
 
@@ -36,7 +36,7 @@ module.exports = {
     if (!product) return res.send("Product not found!");
 
     //Getting all the photos of the product
-    results = await File.load(id);
+    results = await File.loadAllProductFiles(id);
     let files = results.rows;
 
     //Formatting the path of the photos to send to the front-end
@@ -45,23 +45,28 @@ module.exports = {
     return res.render("products/show", { product, files });
   },
 
-  create(req, res) {
-    //Getting categories
-    Category.all()
-      .then(function (results) {
-        const categories = results.rows;
+  async create(req, res) {
+    try {
+      const categories = await Category.findAll();
 
-        return res.render("products/create", { categories });
-      })
-      .catch(function (err) {
-        throw new Error(err);
-      });
+      return res.render("products/create", { categories });
+    } catch (error) {
+      console.error(error);
+    }
   },
 
   async post(req, res) {
     try {
       req.body.user_id = req.session.userID;
-      const urlEncoded = req.body;
+      let {
+        category_id,
+        name,
+        description,
+        old_price,
+        price,
+        quantity,
+        status,
+      } = req.body;
 
       if (validationOfBlankForms(req.body)) {
         return res.render("products/create", {
@@ -72,7 +77,7 @@ module.exports = {
 
       //Validation of quantity of photos sent
       if (req.files.length === 0) {
-        const results = await Category.all();
+        const results = await Category.findAll();
 
         const categories = results.rows[0];
 
@@ -84,17 +89,29 @@ module.exports = {
       }
 
       //Adding new product to database
-      let results = await Product.create(urlEncoded);
-      const productId = results.rows[0].id;
+      const productId = await Product.create({
+        category_id,
+        user_id: req.session.userID,
+        name,
+        description,
+        old_price: old_price || price.replace(/\D/g, ""),
+        price: price.replace(/\D/g, ""),
+        quantity,
+        status: status || 1,
+      });
 
       //Adding new photos to database
       const imagesPromises = req.files.map((file) => {
-        File.create(file.filename, file.path, productId);
+        File.create({
+          name: file.filename,
+          path: file.path,
+          product_id: productId.id,
+        });
       });
 
       await Promise.all(imagesPromises);
 
-      return res.redirect(`/products/${productId}`);
+      return res.redirect(`/products/${productId.id}`);
     } catch (error) {
       console.error(error);
       return res.render("products/create", {
@@ -107,19 +124,18 @@ module.exports = {
   async edit(req, res) {
     //Getting product
     let results = await Product.find(req.params.id);
-    let product = results.rows[0];
+    let product = results;
 
     if (!product) return res.send("product not found!");
 
     //Getting categories
-    results = await Category.all();
-    const categories = results.rows;
+    const categories = await Category.findAll();
 
     product.old_price = formatPricing(product.old_price);
     product.price = formatPricing(product.price);
 
     //Getting photos and formatting their paths
-    results = await File.load(product.id);
+    results = await File.loadAllProductFiles(product.id);
     let photos = results.rows;
     photos = formatPath(photos, req);
 
@@ -129,7 +145,15 @@ module.exports = {
   async put(req, res) {
     try {
       req.body.user_id = req.session.userID;
-      const urlEncoded = req.body;
+      let {
+        category_id,
+        name,
+        description,
+        old_price,
+        price,
+        quantity,
+        status,
+      } = req.body;
 
       if (validationOfBlankForms(req.body)) {
         return res.render("products/edit", {
@@ -139,17 +163,17 @@ module.exports = {
       }
 
       //Updating the old price value
-      urlEncoded.price = urlEncoded.price.replace(/\D/g, "");
+      price = price.replace(/\D/g, "");
 
-      if (urlEncoded.old_price != urlEncoded.price) {
-        const oldProduct = await Product.find(urlEncoded.id);
+      if (old_price != price) {
+        const oldProduct = await Product.find(req.body.id);
 
-        urlEncoded.old_price = oldProduct.rows[0].price;
+        old_price = oldProduct.rows[0].price;
       }
 
       //Updating the photos excluded in the root and database
-      if (urlEncoded.removed_photos) {
-        const files_id = urlEncoded.removed_photos.split(",");
+      if (removed_photos) {
+        const files_id = removed_photos.split(",");
         files_id.pop(); // removing the last index (',')
 
         files_id.forEach(async (id) => {
@@ -161,13 +185,20 @@ module.exports = {
           fs.unlinkSync(file.path);
 
           //Deleting from database
-          await File.deleteOnlyOne(id);
+          await File.delete(id);
         });
       }
 
       //Updating the product and getting it's ID
-      const results = await Product.update(urlEncoded);
-      const productID = results.rows[0].id;
+      const productID = await Product.update(id, {
+        category_id,
+        name,
+        description,
+        old_price,
+        price,
+        quantity,
+        status,
+      });
 
       //Updating the photos added in the database
       if (req.files.length != 0) {
@@ -196,7 +227,7 @@ module.exports = {
     const { id, removed_photos } = req.body;
 
     //Getting all the photos of this product
-    const results = await File.load(id);
+    const results = await File.loadAllProductFiles(id);
     const files = results.rows;
     const countingRemovedPhotos = removed_photos.split(",");
     countingRemovedPhotos.pop(); // removing the last index (',')
@@ -216,7 +247,7 @@ module.exports = {
       });
 
       //Deleting photos and product from database
-      await File.delete(id);
+      await File.deleteAllFiles(id);
       await Product.delete(id);
 
       return res.redirect("/products/create");

@@ -40,7 +40,7 @@ async function post(req, res, next) {
       or: { cpf_cnpj },
     });
 
-    if (!user) {
+    if (user) {
       return res.render("user/register", {
         error: "Usuário já cadastrado!",
         user: req.body,

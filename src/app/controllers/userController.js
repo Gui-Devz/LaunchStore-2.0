@@ -1,5 +1,10 @@
 const User = require("../models/User");
+const Product = require("../models/Product");
+const File = require("../models/File");
+
 const { formatCpfCnpj, formatCep } = require("../../lib/utils");
+const { hash } = require("bcryptjs");
+const { unlinkSync } = require("fs");
 
 module.exports = {
   registerForm(req, res) {
@@ -21,7 +26,16 @@ module.exports = {
 
   async post(req, res) {
     try {
-      const userID = await User.create(req.body);
+      const user = {
+        ...req.body,
+        password: await hash(data.password, 8),
+        cpf_cnpj: req.body.cpf_cnpj.replace(/\D/g, ""),
+        cep: req.body.cep.replace(/\D/g, ""),
+      };
+
+      delete user["passwordRepeat"];
+
+      const userID = await User.create(user);
 
       req.session.userId = userID;
 
@@ -63,6 +77,26 @@ module.exports = {
 
   async delete(req, res) {
     try {
+      //pegar todos os produtos
+      const products = await Product.find(id);
+
+      //pegar todas as imagens
+      const allFilesPromise = products.map((product) => {
+        File.loadAllProductFiles(product.id);
+      });
+
+      let promiseResults = await Promise.all(allFilesPromise);
+
+      promiseResults.map((results) => {
+        results.rows.map((file) => {
+          try {
+            unlinkSync(file.path);
+          } catch (error) {
+            console.error(error);
+          }
+        });
+      });
+
       await User.delete(req.user.id);
       req.session.destroy();
 

@@ -1,16 +1,16 @@
 const { formatPricing, formatPath } = require("../../lib/utils");
 const Product = require("../models/Product");
+const File = require("../models/File")
 
 module.exports = {
   async index(req, res) {
     try {
-      let results = await Product.all();
-      const products = results.rows;
+      const products = await Product.findAll();
 
       if (!products) return res.send("Products not found!");
 
       async function getImage(productID) {
-        let results = await Product.findFiles(productID);
+        let results = await File.loadAllProductFiles(productID);
 
         const file = formatPath(results.rows, req);
 

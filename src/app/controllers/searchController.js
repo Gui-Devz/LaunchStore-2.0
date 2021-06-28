@@ -25,7 +25,7 @@ module.exports = {
       results = await Product.search(params);
 
       async function getImage(productID) {
-        let results = await Product.findFiles(productID);
+        let results = await File.loadAllProductFiles(productID);
 
         const file = formatPath(results.rows, req);
 

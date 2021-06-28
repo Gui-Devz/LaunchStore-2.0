@@ -37,6 +37,7 @@ CREATE TABLE "users" (
   "name" text NOT NULL,
   "email" text NOT NULL,
   "password" text NOT NULL,
+  "passwordRepeat" text NOT NULL,
   "cpf_cnpj" int UNIQUE NOT NULL,
   "cep" text,
   "address" text,
